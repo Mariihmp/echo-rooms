@@ -334,11 +334,12 @@ export default function App() {
         onTalkToLarry={() => setShowLarryWalkie(true)}
         onOpenHowToPlay={() => setShowHowToPlay(true)}
         onResetProgress={handleResetProgress}
-        activeEpisodeTitle={viewMode !== 'hallway' ? `${activeEpisode.roomNumber} - ${activeEpisode.title}` : undefined}
-        inRoom={viewMode !== 'hallway'}
-        onReturnToHallway={() => {
+        location={viewMode !== 'hallway' ? activeEpisode.roomNumber : undefined}
+        inConsole={viewMode === 'puzzle'}
+        onReturnToHallway={() => setViewMode('hallway')}
+        onReturnToRoom={() => {
           sound.playClick();
-          setViewMode('hallway');
+          setViewMode('room_explore');
         }}
       />
 

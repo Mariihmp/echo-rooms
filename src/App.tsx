@@ -20,6 +20,8 @@ import { SecretSanctuaryModal } from './components/SecretSanctuaryModal';
 import { LarryWalkieModal } from './components/LarryWalkieModal';
 import { EpistleVolumeCard } from './components/EpistleVolumeCard';
 import { HowToPlayModal } from './components/HowToPlayModal';
+import { LessonModal } from './components/lessons/LessonModal';
+import { LESSONS } from './components/lessons';
 
 import { Episode1Puzzle } from './components/puzzles/Episode1Puzzle';
 import { Episode2Puzzle } from './components/puzzles/Episode2Puzzle';
@@ -28,6 +30,15 @@ import { Episode4Puzzle } from './components/puzzles/Episode4Puzzle';
 import { Episode5Puzzle } from './components/puzzles/Episode5Puzzle';
 
 import { CheckCircle, ArrowRight, Sun, Sparkles, Terminal, HelpCircle } from 'lucide-react';
+
+// Dev-only deep links for previewing a screen directly: ?room=2, ?console=2, ?lesson=2&chapter=3
+function readDevLink() {
+  if (!import.meta.env.DEV) return null;
+  const params = new URLSearchParams(window.location.search);
+  const num = (key: string) => (params.has(key) ? Number(params.get(key)) : undefined);
+  return { room: num('room'), console: num('console'), lesson: num('lesson'), chapter: num('chapter') };
+}
+const devLink = readDevLink();
 
 export default function App() {
   // Persistence state
@@ -49,8 +60,16 @@ export default function App() {
     }
   });
 
-  const [activeEpisodeId, setActiveEpisodeId] = useState<number>(1);
-  const [viewMode, setViewMode] = useState<'hallway' | 'room_explore' | 'puzzle'>('hallway');
+  const [activeEpisodeId, setActiveEpisodeId] = useState<number>(
+    devLink?.lesson ?? devLink?.console ?? devLink?.room ?? 1
+  );
+  const [viewMode, setViewMode] = useState<'hallway' | 'room_explore' | 'puzzle'>(
+    devLink?.console ? 'puzzle' : devLink?.room || devLink?.lesson ? 'room_explore' : 'hallway'
+  );
+  const [lesson, setLesson] = useState<{ isOpen: boolean; chapter: number }>({
+    isOpen: Boolean(devLink?.lesson),
+    chapter: devLink?.chapter ?? 0,
+  });
   const [crtEnabled, setCrtEnabled] = useState<boolean>(true);
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
@@ -195,13 +214,18 @@ export default function App() {
           text: 'Got it. Keep searching.',
           action: () => setDialogue((d) => ({ ...d, isOpen: false })),
         },
-        {
-          text: 'Examine room console now.',
-          action: () => {
-            setDialogue((d) => ({ ...d, isOpen: false }));
-            setViewMode('puzzle');
-          },
-        },
+        ...(LESSONS[activeEpisodeId]
+          ? [
+              {
+                text: 'Look inside the machine ▸',
+                action: () => {
+                  setDialogue((d) => ({ ...d, isOpen: false }));
+                  sound.playGearBoyBeep(620, 0.08);
+                  setLesson({ isOpen: true, chapter: 0 });
+                },
+              },
+            ]
+          : []),
       ],
     });
   };
@@ -613,6 +637,19 @@ export default function App() {
         isOpen={showSanctuary}
         onClose={() => setShowSanctuary(false)}
       />
+
+      {/* "Look inside the machine" lesson for the current room */}
+      {lesson.isOpen && (
+        <LessonModal
+          episodeId={activeEpisodeId}
+          initialChapter={lesson.chapter}
+          onClose={() => setLesson({ isOpen: false, chapter: 0 })}
+          onGoToConsole={() => {
+            setLesson({ isOpen: false, chapter: 0 });
+            setViewMode('puzzle');
+          }}
+        />
+      )}
     </div>
   );
 }

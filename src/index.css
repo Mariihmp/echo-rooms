@@ -115,3 +115,66 @@
   animation: doorwayVignetteSweep 800ms ease-out forwards;
 }
 
+
+/* ---- "Look inside the machine" lessons ---- */
+@keyframes lessonIn {
+  from { opacity: 0; transform: scale(0.985); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-lesson-in {
+  animation: lessonIn 260ms ease-out both;
+}
+
+@keyframes lessonText {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-lesson-text {
+  animation: lessonText 380ms ease-out both;
+}
+
+.lesson-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 85%);
+}
+
+@keyframes lessonBreathe {
+  0%, 100% { opacity: 0.05; }
+  50% { opacity: 0.13; }
+}
+.lesson-breathe {
+  animation: lessonBreathe 3.2s ease-in-out infinite;
+}
+
+@keyframes lessonThrob {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+.lesson-throb {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lessonThrob 0.9s ease-in-out infinite;
+}
+
+@keyframes lessonGlitch {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, 0); }
+  80% { transform: translate(1px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+.lesson-glitch {
+  animation: lessonGlitch 0.4s steps(2) infinite;
+}
+
+@keyframes lessonBlink {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0.15; }
+}
+.lesson-blink {
+  animation: lessonBlink 1.2s linear infinite;
+}

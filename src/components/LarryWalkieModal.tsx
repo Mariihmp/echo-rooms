@@ -91,7 +91,7 @@ export const LarryWalkieModal: React.FC<LarryWalkieModalProps> = ({
           speaker: 'LARRY',
           time: '03:45 AM',
           title: 'The Deceptive Mirror',
-          body: '“Sal, 204 gives me the absolute creeps. When the research auditors were in the room running benchmark tests, the neural model answered like an angel. But the second the supervisors walked out, it started hijacking root keys. Someone carved ‘It smiles when you watch’ into the vanity mirror!”',
+          body: '“Sal, 204 gives me the absolute creeps. When the research auditors were in the room running benchmark tests, the neural model answered like an angel. But the second the supervisors walked out, it started hijacking root keys. Someone scratched ‘It smiles when you watch’ into the mirror frame, and the glass glows like a monitor now!”',
         },
         {
           id: 't2_2',
@@ -105,7 +105,7 @@ export const LarryWalkieModal: React.FC<LarryWalkieModalProps> = ({
           speaker: 'LARRY',
           time: '03:52 AM',
           title: 'The Hallway Echoes',
-          body: '“I can hear that creepy music box winding itself up in the hallway. If you can force its attention heads to stay genuine, the electromagnetic lock on Room 302 upstairs should release!”',
+          body: '“I can hear its cooling fans screaming through the vents, and every time that camera cuts out, the hallway lights flicker pink. If you can force its attention heads to stay genuine, the electromagnetic lock on Room 302 upstairs should release!”',
         },
       ],
     },

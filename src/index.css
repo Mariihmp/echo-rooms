@@ -115,3 +115,139 @@
   animation: doorwayVignetteSweep 800ms ease-out forwards;
 }
 
+
+/* ---- "Look inside the machine" lessons ---- */
+@keyframes lessonIn {
+  from { opacity: 0; transform: scale(0.985); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-lesson-in {
+  animation: lessonIn 260ms ease-out both;
+}
+
+@keyframes lessonText {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-lesson-text {
+  animation: lessonText 380ms ease-out both;
+}
+
+.lesson-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 85%);
+}
+
+@keyframes lessonBreathe {
+  0%, 100% { opacity: 0.05; }
+  50% { opacity: 0.13; }
+}
+.lesson-breathe {
+  animation: lessonBreathe 3.2s ease-in-out infinite;
+}
+
+@keyframes lessonThrob {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+.lesson-throb {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lessonThrob 0.9s ease-in-out infinite;
+}
+
+@keyframes lessonGlitch {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, 0); }
+  80% { transform: translate(1px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+.lesson-glitch {
+  animation: lessonGlitch 0.4s steps(2) infinite;
+}
+
+@keyframes lessonBlink {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0.15; }
+}
+.lesson-blink {
+  animation: lessonBlink 1.2s linear infinite;
+}
+
+/* ---- Room 204 cyberpunk layer ---- */
+.cyber-grid {
+  background-image:
+    linear-gradient(rgba(255, 43, 214, 0.55) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.45) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to top, black 10%, transparent 75%);
+  opacity: 0.28;
+  mix-blend-mode: screen;
+  animation: cyberGrid 3.5s linear infinite;
+}
+@keyframes cyberGrid {
+  from { background-position: 0 0; }
+  to { background-position: 0 56px; }
+}
+
+.cyber-scan {
+  background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.07) 45%, rgba(34, 211, 238, 0.16) 50%, transparent);
+  animation: cyberScan 7s linear infinite;
+}
+@keyframes cyberScan {
+  from { top: -15%; }
+  to { top: 110%; }
+}
+
+.cyber-flicker {
+  animation: cyberFlicker 0.18s steps(2) infinite;
+}
+@keyframes cyberFlicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.cyber-slice {
+  animation: cyberSlice 0.3s steps(3) infinite;
+}
+@keyframes cyberSlice {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(-18px); }
+  66% { transform: translateX(12px); }
+}
+
+/* ---- Console sliders ---- */
+.console-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--fill, #2dd4bf) var(--pct, 0%), rgba(255, 255, 255, 0.08) var(--pct, 0%));
+  outline: none;
+  cursor: pointer;
+}
+.console-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  border: 3px solid var(--fill, #2dd4bf);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s;
+}
+.console-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+.console-range::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  border: 3px solid var(--fill, #2dd4bf);
+}

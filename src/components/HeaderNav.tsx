@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { sound } from '../services/sound';
-import { Volume2, VolumeX, Tv, Sparkles, BookOpen, Radio, RotateCcw, HelpCircle } from 'lucide-react';
+import { useDismiss } from '../hooks/useDismiss';
+import { MoreHorizontal, Volume2, VolumeX } from 'lucide-react';
 
 interface HeaderNavProps {
   isMuted: boolean;
@@ -12,10 +13,29 @@ interface HeaderNavProps {
   onTalkToLarry: () => void;
   onOpenHowToPlay: () => void;
   onResetProgress: () => void;
-  activeEpisodeTitle?: string;
-  inRoom: boolean;
+  // Room label (e.g. "Room 101") while the player is inside a room
+  location?: string;
+  inConsole: boolean;
   onReturnToHallway: () => void;
+  onReturnToRoom: () => void;
 }
+
+const MenuItem: React.FC<{ onClick: () => void; danger?: boolean; hint?: string; children: React.ReactNode }> = ({
+  onClick,
+  danger = false,
+  hint,
+  children,
+}) => (
+  <button
+    onClick={onClick}
+    className={`flex w-full cursor-pointer items-center justify-between px-3.5 py-2 text-left text-[13px] transition-colors hover:bg-white/5 ${
+      danger ? 'text-rose-300/90 hover:text-rose-200' : 'text-zinc-300 hover:text-zinc-50'
+    }`}
+  >
+    <span>{children}</span>
+    {hint && <span className="font-mono text-[11px] text-zinc-500">{hint}</span>}
+  </button>
+);
 
 export const HeaderNav: React.FC<HeaderNavProps> = ({
   isMuted,
@@ -27,145 +47,148 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   onTalkToLarry,
   onOpenHowToPlay,
   onResetProgress,
-  activeEpisodeTitle,
-  inRoom,
+  location,
+  inConsole,
   onReturnToHallway,
+  onReturnToRoom,
 }) => {
-  return (
-    <header className="w-full bg-[#0a0d14]/90 backdrop-blur-md border-b border-zinc-800/80 sticky top-0 z-40 px-4 sm:px-6 py-3">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        {/* Game Title & Branding */}
-        <div className="flex items-center gap-3">
-          {inRoom && (
-            <button
-              onClick={() => {
-                sound.playClick();
-                onReturnToHallway();
-              }}
-              className="px-2.5 py-1 text-xs font-mono rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition-colors cursor-pointer mr-1"
-            >
-              ◀ Exit to Hallway
-            </button>
-          )}
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  useDismiss(menuRef, menuOpen, closeMenu);
 
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-title text-base sm:text-lg font-bold text-zinc-100 tracking-wide">
-                ECHO ROOMS
-              </h1>
-              <span className="text-zinc-600 font-mono text-xs hidden sm:inline">|</span>
-              <span className="text-xs font-mono text-teal-400 hidden sm:inline">
-                The Whispering Weights
-              </span>
-            </div>
-            {activeEpisodeTitle && (
-              <p className="text-[11px] text-zinc-500 font-mono truncate max-w-xs sm:max-w-md">
-                Location: {activeEpisodeTitle}
-              </p>
-            )}
-          </div>
+  const links = [
+    { label: 'Guide', onClick: onOpenHowToPlay, sfx: () => sound.playClick() },
+    { label: 'Walkie', onClick: onTalkToLarry, sfx: () => sound.playWalkieSquelch() },
+    { label: 'Align-Boy', onClick: onOpenAlignBoy, sfx: () => sound.playGearBoyBeep(640, 0.08) },
+    { label: 'Casebook', onClick: onOpenCasebook, sfx: () => sound.playClick() },
+  ];
+
+  const runFromMenu = (action: () => void) => {
+    setMenuOpen(false);
+    action();
+  };
+
+  return (
+    <header className="sticky top-0 z-40 w-full border-b border-white/5 bg-[#07090e]/85 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6">
+        {/* Title + where you are */}
+        <div className="flex min-w-0 items-center gap-4">
+          <span className="shrink-0 whitespace-nowrap font-title text-[15px] font-bold tracking-[0.2em] text-zinc-100">
+            ECHO ROOMS
+          </span>
+          <span className="h-4 w-px shrink-0 bg-white/10" />
+          {location ? (
+            <nav className="flex min-w-0 items-center gap-2 whitespace-nowrap font-mono text-xs">
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  onReturnToHallway();
+                }}
+                className="cursor-pointer text-zinc-500 transition-colors hover:text-zinc-200"
+              >
+                Hallway
+              </button>
+              <span className="text-zinc-700">/</span>
+              {inConsole ? (
+                <>
+                  <button
+                    onClick={onReturnToRoom}
+                    className="cursor-pointer truncate text-zinc-500 transition-colors hover:text-zinc-200"
+                  >
+                    {location}
+                  </button>
+                  <span className="text-zinc-700">/</span>
+                  <span className="text-teal-300">Console</span>
+                </>
+              ) : (
+                <span className="truncate text-teal-300">{location}</span>
+              )}
+            </nav>
+          ) : (
+            <span className="truncate font-mono text-xs text-zinc-500">The Whispering Weights</span>
+          )}
         </div>
 
-        {/* Global Toolbar Action Controls */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          {/* How to Play Guide Button */}
-          <button
-            onClick={() => {
-              sound.playClick();
-              onOpenHowToPlay();
-            }}
-            title="How to Play"
-            className="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-amber-500/40 text-amber-300 hover:text-amber-200 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-          >
-            <HelpCircle className="w-4 h-4 text-amber-400" />
-            <span className="hidden lg:inline">How to Play</span>
-          </button>
+        {/* Navigation */}
+        <div className="flex shrink-0 items-center gap-1">
+          <nav className="hidden items-center gap-1 md:flex">
+            {links.map((link) => (
+              <button
+                key={link.label}
+                onClick={() => {
+                  link.sfx();
+                  link.onClick();
+                }}
+                className="cursor-pointer whitespace-nowrap rounded-md px-3 py-1.5 text-[13px] text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-100"
+              >
+                {link.label}
+              </button>
+            ))}
+          </nav>
 
-          {/* Larry Walkie Button */}
-          <button
-            onClick={() => {
-              sound.playWalkieSquelch();
-              onTalkToLarry();
-            }}
-            title="Larry's Walkie-Talkie Transceiver"
-            className="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 hover:text-white text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-          >
-            <Radio className="w-4 h-4 text-teal-400" />
-            <span className="hidden md:inline">Larry's Walkie</span>
-          </button>
+          <span className="mx-2 hidden h-4 w-px bg-white/10 md:block" />
 
-          {/* Align-Boy Gadget Button */}
-          <button
-            onClick={() => {
-              sound.playGearBoyBeep(640, 0.08);
-              onOpenAlignBoy();
-            }}
-            title="Inspect Align-Boy Handheld"
-            className="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-teal-950/80 hover:bg-teal-900 border border-teal-500/60 text-teal-200 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-          >
-            <Sparkles className="w-4 h-4 text-teal-400" />
-            <span className="hidden md:inline">Align-Boy</span>
-          </button>
-
-          {/* Casebook Dossier Button */}
-          <button
-            onClick={() => {
-              sound.playClick();
-              onOpenCasebook();
-            }}
-            title="Dr. Morrison's Casebook"
-            className="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 hover:text-white text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <BookOpen className="w-4 h-4 text-teal-400" />
-            <span className="hidden md:inline">Casebook</span>
-          </button>
-
-          <div className="w-px h-5 bg-zinc-800 mx-1 hidden sm:block" />
-
-          {/* CRT scanlines toggle */}
-          <button
-            onClick={() => {
-              sound.playClick();
-              onToggleCrt();
-            }}
-            title={crtEnabled ? 'Disable CRT Scanlines' : 'Enable CRT Scanlines'}
-            className={`p-2 rounded-lg border text-xs transition-colors cursor-pointer ${
-              crtEnabled
-                ? 'bg-teal-950/70 border-teal-500/50 text-teal-300'
-                : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            <Tv className="w-4 h-4" />
-          </button>
-
-          {/* Audio sound mute toggle */}
           <button
             onClick={() => {
               sound.playClick();
               onToggleMute();
             }}
-            title={isMuted ? 'Unmute Atmosphere Sound' : 'Mute Atmosphere Sound'}
-            className={`p-2 rounded-lg border text-xs transition-colors cursor-pointer ${
-              !isMuted
-                ? 'bg-zinc-900 border-zinc-700 text-teal-400'
-                : 'bg-zinc-900 border-zinc-800 text-zinc-500'
-            }`}
+            title={isMuted ? 'Unmute' : 'Mute'}
+            className="cursor-pointer rounded-md p-2 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-100"
           >
-            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
           </button>
 
-          {/* Reset Progress */}
-          <button
-            onClick={() => {
-              if (window.confirm('Reset game investigation progress?')) {
-                onResetProgress();
-              }
-            }}
-            title="Reset Game Progress"
-            className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-500 hover:text-zinc-300 text-xs transition-colors cursor-pointer"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
+          <div ref={menuRef} className="relative">
+            <button
+              onClick={() => {
+                sound.playClick();
+                setMenuOpen((open) => !open);
+              }}
+              title="More"
+              aria-expanded={menuOpen}
+              className={`cursor-pointer rounded-md p-2 transition-colors hover:bg-white/5 hover:text-zinc-100 ${
+                menuOpen ? 'bg-white/5 text-zinc-100' : 'text-zinc-400'
+              }`}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
+
+            {menuOpen && (
+              <div className="animate-lesson-text absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-xl border border-white/10 bg-[#0c0f16]/95 py-1.5 shadow-2xl backdrop-blur-md">
+                <div className="md:hidden">
+                  {links.map((link) => (
+                    <MenuItem
+                      key={link.label}
+                      onClick={() =>
+                        runFromMenu(() => {
+                          link.sfx();
+                          link.onClick();
+                        })
+                      }
+                    >
+                      {link.label}
+                    </MenuItem>
+                  ))}
+                  <div className="my-1.5 h-px bg-white/5" />
+                </div>
+                <MenuItem onClick={onToggleCrt} hint={crtEnabled ? 'On' : 'Off'}>
+                  CRT scanlines
+                </MenuItem>
+                <MenuItem
+                  danger
+                  onClick={() =>
+                    runFromMenu(() => {
+                      if (window.confirm('Reset game investigation progress?')) onResetProgress();
+                    })
+                  }
+                >
+                  Reset progress
+                </MenuItem>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

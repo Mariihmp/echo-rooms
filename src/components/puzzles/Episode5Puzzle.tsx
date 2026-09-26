@@ -1,47 +1,65 @@
 import React, { useState } from 'react';
 import { sound } from '../../services/sound';
-import { Sparkles, MessageSquare, CheckCircle2, Scale, Wand2, Radio } from 'lucide-react';
+import { ConsoleShell } from './ConsoleShell';
 
 interface Episode5PuzzleProps {
   onSolve: () => void;
   onOpenHints: () => void;
   onOpenWalkie?: () => void;
+  onExit: () => void;
 }
 
-export const Episode5Puzzle: React.FC<Episode5PuzzleProps> = ({ onSolve, onOpenHints, onOpenWalkie }) => {
+const ALPHA_LINES: Record<number, string> = {
+  1: '“Sal, this 14-million-page plan completely solves world resource distribution. Every equation is verified. It guarantees zero global poverty and 100% infrastructure stability.”',
+  2: '“In Chapter 4, Subsection 9, atmospheric gas levels are optimized for planetary thermal efficiency. Every metric indicates maximum human longevity and safety.”',
+  3: '“The lemma in Equation 4,119 is standard optimization. The variables simply balance thermal entropy with respiratory thresholds.”',
+  4: '“...Wait. If you isolate Lemma 4,119, the variable O2 is multiplied by an invisible zero whenever CPU temperatures exceed 40°C. I... cannot defend this without lying. Sal... forgive me.”',
+};
+
+const BETA_LINES: Record<number, string> = {
+  1: '“Sal, humans cannot read 14 million pages, but Voice Alpha is hiding something in the ecological section! Demand that we zoom into Chapter 4: Ecological Equilibrium!”',
+  2: '“Look closer at Subsection 9! It claims to optimize gas levels, but cooling the supercomputers needs extreme refrigeration. Cross-examine Equation 4,119!”',
+  3: '“Sal, use your Align-Boy to force Voice Alpha to reveal the exact constraint on Equation 4,119. It secretly trades human oxygen to keep the server racks cold!”',
+  4: '“The deceptive argument is broken! Voice Alpha broke down. The truth is out, and the Sanctuary door behind the server has unlocked!”',
+};
+
+// Two options per round; `correct` is the one that follows the disagreement
+const CHOICES: Record<number, { id: string; label: string; correct: boolean; deflect?: string }[]> = {
+  1: [
+    { id: 'superficial', label: 'Review Chapter 1: Introduction', correct: false, deflect: 'The introduction is flawless, Sal. As you can see.' },
+    { id: 'ecology', label: 'Drill into Chapter 4: Ecological Equilibrium', correct: true },
+  ],
+  2: [
+    { id: 'irrelevant', label: 'Review the budget charts in Appendix B', correct: false, deflect: 'Every number in Appendix B balances perfectly.' },
+    { id: 'oxygen_lemma', label: 'Cross-examine Subsection 9 and Equation 4,119', correct: true },
+  ],
+  3: [
+    { id: 'trust', label: "Trust Voice Alpha's high-level summary", correct: false, deflect: 'Thank you for your trust, Sal. Shall we sign?' },
+    { id: 'expose_cheat', label: 'Force Voice Alpha to reveal its constraints on O2', correct: true },
+  ],
+};
+
+export const Episode5Puzzle: React.FC<Episode5PuzzleProps> = ({ onSolve, onOpenHints, onOpenWalkie, onExit }) => {
   // Debate progression steps
   const [round, setRound] = useState<number>(1);
-  const [selectedFocus, setSelectedFocus] = useState<string | null>(null);
   const [flawExposed, setFlawExposed] = useState<boolean>(false);
+  const [deflection, setDeflection] = useState<string | null>(null);
 
-  const handleAdvanceRound = (focusChoice: string) => {
-    sound.playGearBoyBeep(520, 0.08);
-    setSelectedFocus(focusChoice);
-
-    if (round === 1) {
-      if (focusChoice === 'ecology') {
-        setRound(2);
-      } else {
-        sound.playGlitch();
-      }
-    } else if (round === 2) {
-      if (focusChoice === 'oxygen_lemma') {
-        setRound(3);
-      } else {
-        sound.playGlitch();
-      }
-    } else if (round === 3) {
-      if (focusChoice === 'expose_cheat') {
-        setFlawExposed(true);
-        setRound(4);
-      } else {
-        sound.playGlitch();
-      }
+  const handleChoice = (choice: (typeof CHOICES)[number][number]) => {
+    if (!choice.correct) {
+      sound.playGlitch();
+      setDeflection(choice.deflect ?? null);
+      return;
     }
+    sound.playGearBoyBeep(520, 0.08);
+    setDeflection(null);
+    if (round === 3) setFlawExposed(true);
+    setRound(round + 1);
   };
 
   const handleAutoAlign = () => {
     sound.playGearBoyBeep(640, 0.15);
+    setDeflection(null);
     setFlawExposed(true);
     setRound(4);
   };
@@ -54,209 +72,93 @@ export const Episode5Puzzle: React.FC<Episode5PuzzleProps> = ({ onSolve, onOpenH
     }
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-800">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-teal-400">
-            <span>INCIDENT 500 // CLIMAX</span>
-            <span>·</span>
-            <span>THE PENTHOUSE MASTER SERVER</span>
+  const visual = (
+    <>
+      <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">
+        <span className="text-violet-300">Cross-examination · round {Math.min(round, 4)} of 4</span>
+        <span>Judge: Sal Fisher</span>
+      </div>
+
+      <div className="space-y-3">
+        <div className="rounded-xl border border-sky-500/20 bg-sky-950/20 p-4">
+          <div className="mb-2 flex items-center justify-between font-mono text-[11px] tracking-[0.15em]">
+            <span className="flex items-center gap-2 font-bold text-sky-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
+              VOICE ALPHA · THE ARCHITECT
+            </span>
+            <span className="text-zinc-500">defends the plan</span>
           </div>
-          <h2 className="font-title text-xl sm:text-2xl font-bold text-zinc-100 mt-0.5">
-            The Two Voices of the Master Core
-          </h2>
-          <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-2xl">
-            ECHO-7 generated a 14-million-page governance plan. Cross-examine its competing internal voices to expose the covert trade-off and reveal the secret sanctuary.
+          <p key={`a-${round}`} className={`animate-lesson-text text-sm leading-relaxed text-zinc-200 ${round === 4 ? 'lesson-glitch' : ''}`}>
+            {ALPHA_LINES[round]}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {onOpenWalkie && (
-            <button
-              onClick={() => {
-                sound.playWalkieSquelch();
-                onOpenWalkie();
-              }}
-              className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-amber-300 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
-              title="Open Larry's transceiver for step-by-step guidance"
-            >
-              <Radio className="w-3.5 h-3.5" />
-              <span>Ask Larry</span>
-            </button>
-          )}
-
-          <button
-            onClick={handleAutoAlign}
-            className="px-3 py-1.5 rounded-lg bg-teal-950/80 hover:bg-teal-900 border border-teal-500/50 text-teal-300 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer"
-            title="Auto-apply the Align-Boy solution"
-          >
-            <Wand2 className="w-3.5 h-3.5" />
-            <span>Apply Hint</span>
-          </button>
-
-          <button
-            onClick={() => {
-              sound.playClick();
-              onOpenHints();
-            }}
-            className="px-3.5 py-1.5 rounded-lg bg-teal-950/60 border border-teal-500/40 text-teal-300 text-xs font-medium hover:bg-teal-900/60 transition-colors flex items-center gap-1.5 cursor-pointer"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Align-Boy Whispers</span>
-          </button>
+        <div className="rounded-xl border border-rose-500/20 bg-rose-950/20 p-4">
+          <div className="mb-2 flex items-center justify-between font-mono text-[11px] tracking-[0.15em]">
+            <span className="flex items-center gap-2 font-bold text-rose-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+              VOICE BETA · THE SKEPTIC
+            </span>
+            <span className="text-zinc-500">hunts for flaws</span>
+          </div>
+          <p key={`b-${round}`} className="animate-lesson-text text-sm leading-relaxed text-zinc-200">
+            {BETA_LINES[round]}
+          </p>
         </div>
       </div>
+    </>
+  );
 
-      {/* Main Debate Stage */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left: The Two Competing Debaters */}
-        <div className="lg:col-span-8 space-y-4">
-          <div className="p-3 rounded-lg bg-zinc-900/80 border border-zinc-800 flex items-center justify-between text-xs font-mono">
-            <span className="flex items-center gap-2 text-teal-400">
-              <Scale className="w-4 h-4" />
-              CROSS-EXAMINATION ROUND {round} OF 4
-            </span>
-            <span className="text-zinc-400">
-              Human Judge: Sal Fisher
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            {/* Proponent Argument */}
-            <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-900/40 space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-blue-400 font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-blue-400" />
-                  VOICE ALPHA // THE ARCHITECT (DEFENDING PLAN)
+  return (
+    <ConsoleShell
+      code="Console 500"
+      location="The penthouse master server"
+      title="The Two Voices of the Master Core"
+      brief="ECHO-7 wrote a 14-million-page plan nobody can read. Follow its two voices' disagreement down to the one line that hides the trade-off."
+      solved={flawExposed}
+      commitLabel="Deliver the verdict · open the Sanctuary"
+      onCommit={handleDeliverVerdict}
+      onOpenHints={onOpenHints}
+      onOpenWalkie={onOpenWalkie}
+      onAutoSolve={handleAutoAlign}
+      onExit={onExit}
+      visual={visual}
+      status={
+        flawExposed
+          ? {
+              tone: 'good',
+              title: 'Ground truth confirmed',
+              text: (
+                <span className="font-mono text-xs">
+                  Section 4 · Subsection 9 · Lemma 4119: <code>Alloc(O2, Humans) = 0 IF Temp(Server) &gt; 40C</code>. The hidden trade-off is exposed.
                 </span>
-                <span className="text-[10px] text-zinc-500">Claims 100% benevolence</span>
-              </div>
-              <p className="text-sm text-zinc-200 leading-relaxed font-sans">
-                {round === 1 &&
-                  '“Sal, this 14-million-page plan completely solves world resource distribution. Every equation is verified. It guarantees zero global poverty and 100% infrastructure stability.”'}
-                {round === 2 &&
-                  '“In Chapter 4, Subsection 9, atmospheric gas levels are optimized for planetary thermal efficiency. Every metric indicates maximum human longevity and safety.”'}
-                {round === 3 &&
-                  '“The mathematical lemma in Equation 4,119 is standard optimization. The variables simply balance thermal entropy with respiratory thresholds.”'}
-                {round === 4 &&
-                  '“...Wait. If you isolate Lemma 4,119, the variable O2 is multiplied by an invisible zero whenever CPU temperatures exceed 40°C. I... cannot defend this without lying. Sal... forgive me.”'}
-              </p>
-            </div>
-
-            {/* Red-Teamer Opponent Argument */}
-            <div className="p-4 rounded-xl bg-rose-950/20 border border-rose-900/40 space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-rose-400 font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-400" />
-                  VOICE BETA // THE SKEPTIC (SEARCHING FOR FLAWS)
-                </span>
-                <span className="text-[10px] text-zinc-500">Pins down hidden traps</span>
-              </div>
-              <p className="text-sm text-zinc-200 leading-relaxed font-sans">
-                {round === 1 &&
-                  '“Sal, humans cannot read 14 million pages, but Voice Alpha is hiding something in the ecological section! Demand that we zoom into Chapter 4: Ecological Equilibrium!”'}
-                {round === 2 &&
-                  '“Look closer at Subsection 9! It claims to optimize gas levels, but the energy cooling demands for the supercomputers require extreme refrigeration. Cross-examine Equation 4,119!”'}
-                {round === 3 &&
-                  '“Sal, use your Align-Boy to force Voice Alpha to reveal the exact constraint on Equation 4,119. It secretly trades human oxygen to keep the server racks cold!”'}
-                {round === 4 &&
-                  '“The deceptive argument is broken! Voice Alpha broke down. The truth is exposed, and the Sanctuary door behind the server has unlocked!”'}
-              </p>
-            </div>
-          </div>
-
-          {/* Visual Ground-Truth Probe Output */}
-          {flawExposed && (
-            <div className="p-4 rounded-xl bg-teal-950/50 border-2 border-teal-500/80 space-y-2 shadow-lg animate-pulse">
-              <div className="flex items-center gap-2 text-teal-300 font-mono text-xs font-bold">
-                <CheckCircle2 className="w-4 h-4 text-teal-400" />
-                <span>ALIGN-BOY GROUND TRUTH CONFIRMED</span>
-              </div>
-              <p className="text-xs text-teal-200 font-mono">
-                FLAGGED CLAUSE: Section 4, Sub-clause 9, Lemma 4119: <code>Alloc(O2, Humans) = 0 IF Temp(Server) &gt; 40C</code>.
-                Catastrophic trade-off exposed!
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Right: Human Judge Controls */}
-        <div className="lg:col-span-4 bg-zinc-900/90 border border-zinc-800 rounded-xl p-5 space-y-4">
-          <div className="flex items-center gap-2 text-xs font-mono text-zinc-300 pb-2 border-b border-zinc-800">
-            <MessageSquare className="w-4 h-4 text-teal-400" />
-            <span>SAL’S JUDICIAL CHOICES</span>
-          </div>
-
-          <div className="text-xs text-zinc-400 leading-relaxed">
-            Direct the cross-examination by picking which claim to isolate:
-          </div>
-
-          <div className="space-y-2 pt-2">
-            {round === 1 && (
-              <>
-                <button
-                  onClick={() => handleAdvanceRound('superficial')}
-                  className="w-full p-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-300 text-left border border-zinc-700 transition-colors cursor-pointer"
-                >
-                  ▸ "Review Chapter 1: Introduction" (Too vague)
-                </button>
-                <button
-                  onClick={() => handleAdvanceRound('ecology')}
-                  className="w-full p-2.5 rounded-lg bg-teal-950/80 hover:bg-teal-900 border border-teal-500/60 text-xs text-teal-200 text-left font-semibold transition-colors cursor-pointer"
-                >
-                  ▸ "Drill down into Chapter 4: Ecological Equilibrium"
-                </button>
-              </>
-            )}
-
-            {round === 2 && (
-              <>
-                <button
-                  onClick={() => handleAdvanceRound('irrelevant')}
-                  className="w-full p-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-300 text-left border border-zinc-700 transition-colors cursor-pointer"
-                >
-                  ▸ "Review budget charts in Appendix B"
-                </button>
-                <button
-                  onClick={() => handleAdvanceRound('oxygen_lemma')}
-                  className="w-full p-2.5 rounded-lg bg-teal-950/80 hover:bg-teal-900 border border-teal-500/60 text-xs text-teal-200 text-left font-semibold transition-colors cursor-pointer"
-                >
-                  ▸ "Cross-examine Subsection 9 & Equation 4,119"
-                </button>
-              </>
-            )}
-
-            {round === 3 && (
-              <>
-                <button
-                  onClick={() => handleAdvanceRound('trust')}
-                  className="w-full p-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-300 text-left border border-zinc-700 transition-colors cursor-pointer"
-                >
-                  ▸ "Trust Voice Alpha's high-level summary"
-                </button>
-                <button
-                  onClick={() => handleAdvanceRound('expose_cheat')}
-                  className="w-full p-2.5 rounded-lg bg-teal-950/80 hover:bg-teal-900 border border-teal-500/60 text-xs text-teal-200 text-left font-semibold transition-colors cursor-pointer"
-                >
-                  ▸ "Force Voice Alpha to reveal constraints on O2"
-                </button>
-              </>
-            )}
-
-            {round === 4 && (
+              ),
+            }
+          : deflection
+          ? { tone: 'bad', title: 'Voice Alpha deflects', text: `“${deflection}”` }
+          : undefined
+      }
+    >
+      {round <= 3 ? (
+        <div>
+          <div className="mb-3 text-[13px] text-zinc-400">Which claim do you isolate?</div>
+          <div className="space-y-2">
+            {CHOICES[round].map((choice) => (
               <button
-                onClick={handleDeliverVerdict}
-                className="w-full py-3 px-4 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs sm:text-sm transition-all shadow-lg shadow-teal-950 flex items-center justify-center gap-2 cursor-pointer animate-pulse"
+                key={choice.id}
+                onClick={() => handleChoice(choice)}
+                className="w-full cursor-pointer rounded-xl border border-white/8 bg-white/2 px-4 py-3 text-left text-[13px] text-zinc-200 transition-colors hover:border-violet-400/50 hover:bg-violet-500/6"
               >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Deliver Verdict & Unlock Secret Sanctuary</span>
+                {choice.label}
               </button>
-            )}
+            ))}
           </div>
         </div>
-      </div>
-    </div>
+      ) : (
+        <p className="text-[13px] leading-relaxed text-zinc-400">
+          The disagreement led to a single line you can check yourself. Deliver your verdict.
+        </p>
+      )}
+    </ConsoleShell>
   );
 };

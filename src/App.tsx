@@ -20,6 +20,9 @@ import { SecretSanctuaryModal } from './components/SecretSanctuaryModal';
 import { LarryWalkieModal } from './components/LarryWalkieModal';
 import { EpistleVolumeCard } from './components/EpistleVolumeCard';
 import { HowToPlayModal } from './components/HowToPlayModal';
+import { LessonModal } from './components/lessons/LessonModal';
+import { LESSONS } from './components/lessons';
+import investigatorPortrait from './assets/images/masked_investigator_1790408543574.jpg';
 
 import { Episode1Puzzle } from './components/puzzles/Episode1Puzzle';
 import { Episode2Puzzle } from './components/puzzles/Episode2Puzzle';
@@ -28,6 +31,24 @@ import { Episode4Puzzle } from './components/puzzles/Episode4Puzzle';
 import { Episode5Puzzle } from './components/puzzles/Episode5Puzzle';
 
 import { CheckCircle, ArrowRight, Sun, Sparkles, Terminal, HelpCircle } from 'lucide-react';
+
+// Dev-only deep links for previewing a screen directly: ?room=2, ?console=2, ?lesson=2&chapter=3
+function readDevLink() {
+  if (!import.meta.env.DEV) return null;
+  const params = new URLSearchParams(window.location.search);
+  const num = (key: string) => (params.has(key) ? Number(params.get(key)) : undefined);
+  return { room: num('room'), console: num('console'), lesson: num('lesson'), chapter: num('chapter') };
+}
+const devLink = readDevLink();
+
+// Calibration console for each episode
+const PUZZLES: Record<number, typeof Episode1Puzzle> = {
+  1: Episode1Puzzle,
+  2: Episode2Puzzle,
+  3: Episode3Puzzle,
+  4: Episode4Puzzle,
+  5: Episode5Puzzle,
+};
 
 export default function App() {
   // Persistence state
@@ -49,8 +70,16 @@ export default function App() {
     }
   });
 
-  const [activeEpisodeId, setActiveEpisodeId] = useState<number>(1);
-  const [viewMode, setViewMode] = useState<'hallway' | 'room_explore' | 'puzzle'>('hallway');
+  const [activeEpisodeId, setActiveEpisodeId] = useState<number>(
+    devLink?.lesson ?? devLink?.console ?? devLink?.room ?? 1
+  );
+  const [viewMode, setViewMode] = useState<'hallway' | 'room_explore' | 'puzzle'>(
+    devLink?.console ? 'puzzle' : devLink?.room || devLink?.lesson ? 'room_explore' : 'hallway'
+  );
+  const [lesson, setLesson] = useState<{ isOpen: boolean; chapter: number }>({
+    isOpen: Boolean(devLink?.lesson),
+    chapter: devLink?.chapter ?? 0,
+  });
   const [crtEnabled, setCrtEnabled] = useState<boolean>(true);
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
@@ -152,6 +181,7 @@ export default function App() {
   }, []);
 
   const activeEpisode = episodes.find((e) => e.id === activeEpisodeId) || episodes[0];
+  const ActivePuzzle = PUZZLES[activeEpisodeId];
   const allCompleted = episodes.every((e) => e.status === 'completed');
 
   // Step into an apartment room for atmospheric exploration
@@ -189,19 +219,24 @@ export default function App() {
       speaker: 'Sal Fisher',
       speakerTitle: `Examining ${title}`,
       text: text,
-      portraitSrc: '/images/masked_investigator_1790408543574.jpg',
+      portraitSrc: investigatorPortrait,
       choices: [
         {
           text: 'Got it. Keep searching.',
           action: () => setDialogue((d) => ({ ...d, isOpen: false })),
         },
-        {
-          text: 'Examine room console now.',
-          action: () => {
-            setDialogue((d) => ({ ...d, isOpen: false }));
-            setViewMode('puzzle');
-          },
-        },
+        ...(LESSONS[activeEpisodeId]
+          ? [
+              {
+                text: 'Look inside the machine ▸',
+                action: () => {
+                  setDialogue((d) => ({ ...d, isOpen: false }));
+                  sound.playGearBoyBeep(620, 0.08);
+                  setLesson({ isOpen: true, chapter: 0 });
+                },
+              },
+            ]
+          : []),
       ],
     });
   };
@@ -310,18 +345,23 @@ export default function App() {
         onTalkToLarry={() => setShowLarryWalkie(true)}
         onOpenHowToPlay={() => setShowHowToPlay(true)}
         onResetProgress={handleResetProgress}
-        activeEpisodeTitle={viewMode !== 'hallway' ? `${activeEpisode.roomNumber} - ${activeEpisode.title}` : undefined}
-        inRoom={viewMode !== 'hallway'}
-        onReturnToHallway={() => {
+        location={viewMode !== 'hallway' ? activeEpisode.roomNumber : undefined}
+        inConsole={viewMode === 'puzzle'}
+        onReturnToHallway={() => setViewMode('hallway')}
+        onReturnToRoom={() => {
           sound.playClick();
-          setViewMode('hallway');
+          setViewMode('room_explore');
         }}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-start relative z-20 pointer-events-auto">
-        {/* All Episodes Completed Banner & Secret Trigger */}
-        {allCompleted && (
+      <main
+        className={`flex-1 w-full mx-auto flex flex-col justify-start relative z-20 pointer-events-auto ${
+          viewMode === 'room_explore' ? 'max-w-[1800px] p-3 sm:p-4' : 'max-w-7xl p-4 sm:p-6'
+        }`}
+      >
+        {/* All Episodes Completed Banner & Secret Trigger (hidden in rooms, so the scene can fill the screen) */}
+        {allCompleted && viewMode !== 'room_explore' && (
           <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-950/60 via-zinc-900 to-amber-950/60 border border-amber-500/60 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-amber-900/60 border border-amber-400 flex items-center justify-center text-amber-300">
@@ -439,7 +479,10 @@ export default function App() {
           </div>
         ) : viewMode === 'room_explore' ? (
           /* Sally Face Style Room Exploration View with Door Swing Immersion */
-          <div key={`room-explore-${activeEpisode.id}`} className="relative space-y-4 animate-door-swing">
+          <div
+            key={`room-explore-${activeEpisode.id}`}
+            className="relative h-[calc(100dvh-3.5rem-1.5rem)] sm:h-[calc(100dvh-3.5rem-2rem)] animate-door-swing"
+          >
             {/* Subtle doorway threshold shadow sweep on entry */}
             <div className="absolute inset-0 pointer-events-none rounded-2xl z-40 animate-doorway-sweep shadow-[inset_0_0_100px_rgba(0,0,0,0.85)]" />
             <RoomExplorationView
@@ -457,61 +500,16 @@ export default function App() {
             />
           </div>
         ) : (
-          /* Machine Calibration Puzzle Terminal */
-          <div className="space-y-4">
-            <div className="flex items-center justify-between pb-2">
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  setViewMode('room_explore');
-                }}
-                className="px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-mono text-zinc-300 flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
-              >
-                ◀ Step Away from Console
-              </button>
-              <div className="text-xs font-mono text-zinc-400 flex items-center gap-2">
-                <span>Stuck? Click "Apply Hint" or open Larry's Walkie</span>
-              </div>
-            </div>
-
-            <div className="bg-[#0b0e14] border border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-2xl relative">
-              {activeEpisodeId === 1 && (
-                <Episode1Puzzle
-                  onSolve={() => handleSolveEpisode(1)}
-                  onOpenHints={() => setShowHints(true)}
-                  onOpenWalkie={() => setShowLarryWalkie(true)}
-                />
-              )}
-              {activeEpisodeId === 2 && (
-                <Episode2Puzzle
-                  onSolve={() => handleSolveEpisode(2)}
-                  onOpenHints={() => setShowHints(true)}
-                  onOpenWalkie={() => setShowLarryWalkie(true)}
-                />
-              )}
-              {activeEpisodeId === 3 && (
-                <Episode3Puzzle
-                  onSolve={() => handleSolveEpisode(3)}
-                  onOpenHints={() => setShowHints(true)}
-                  onOpenWalkie={() => setShowLarryWalkie(true)}
-                />
-              )}
-              {activeEpisodeId === 4 && (
-                <Episode4Puzzle
-                  onSolve={() => handleSolveEpisode(4)}
-                  onOpenHints={() => setShowHints(true)}
-                  onOpenWalkie={() => setShowLarryWalkie(true)}
-                />
-              )}
-              {activeEpisodeId === 5 && (
-                <Episode5Puzzle
-                  onSolve={() => handleSolveEpisode(5)}
-                  onOpenHints={() => setShowHints(true)}
-                  onOpenWalkie={() => setShowLarryWalkie(true)}
-                />
-              )}
-            </div>
-          </div>
+          /* Machine calibration console */
+          ActivePuzzle && (
+            <ActivePuzzle
+              key={activeEpisodeId}
+              onSolve={() => handleSolveEpisode(activeEpisodeId)}
+              onOpenHints={() => setShowHints(true)}
+              onOpenWalkie={() => setShowLarryWalkie(true)}
+              onExit={() => setViewMode('room_explore')}
+            />
+          )
         )}
       </main>
 
@@ -554,6 +552,7 @@ export default function App() {
 
       {/* Larry's Walkie-Talkie Transceiver */}
       <LarryWalkieModal
+        key={`walkie-${activeEpisodeId}`}
         isOpen={showLarryWalkie}
         onClose={() => setShowLarryWalkie(false)}
         activeEpisodeId={activeEpisodeId}
@@ -591,6 +590,7 @@ export default function App() {
 
       {/* Whisper Hint System */}
       <HintModal
+        key={`hints-${activeEpisodeId}`}
         isOpen={showHints}
         onClose={() => setShowHints(false)}
         episodeTitle={`${activeEpisode.roomNumber}: ${activeEpisode.title}`}
@@ -613,6 +613,19 @@ export default function App() {
         isOpen={showSanctuary}
         onClose={() => setShowSanctuary(false)}
       />
+
+      {/* "Look inside the machine" lesson for the current room */}
+      {lesson.isOpen && (
+        <LessonModal
+          episodeId={activeEpisodeId}
+          initialChapter={lesson.chapter}
+          onClose={() => setLesson({ isOpen: false, chapter: 0 })}
+          onGoToConsole={() => {
+            setLesson({ isOpen: false, chapter: 0 });
+            setViewMode('puzzle');
+          }}
+        />
+      )}
     </div>
   );
 }

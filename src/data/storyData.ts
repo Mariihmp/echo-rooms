@@ -25,7 +25,7 @@ export const INITIAL_EPISODES: Episode[] = [
       {
         level: 3,
         title: 'Whisper 3: Tuning the Calibration Bay',
-        text: 'On the console: lower the absolute accident penalty to ~40%, raise resident freedom above 75%, and turn on the negative side-effect limiter.'
+        text: 'On the console: lower the accident weight to ~40%, raise resident freedom above 75%, keep property preservation above 55%, and turn on the negative side-effect bound.'
       }
     ]
   },

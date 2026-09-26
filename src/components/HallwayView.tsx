@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Episode } from '../types/game';
 import { sound } from '../services/sound';
-import { Lock, CheckCircle2, DoorOpen, Radio, Sparkles, Terminal, ArrowLeft, ArrowRight, Search, HelpCircle } from 'lucide-react';
+import { Lock, DoorOpen, Radio, Sparkles, Terminal, ArrowLeft, ArrowRight, Search, HelpCircle } from 'lucide-react';
 
 interface HallwayViewProps {
   episodes: Episode[];
@@ -133,13 +133,11 @@ export const HallwayView: React.FC<HallwayViewProps> = ({
                   <div className="w-full flex items-center justify-between px-1 my-auto">
                     <div className="w-2.5 h-2.5 rounded-full bg-amber-400/80 shadow-md border border-amber-600" />
                     <div>
-                      {isCompleted ? (
-                        <CheckCircle2 className="w-4 h-4 text-teal-400" />
-                      ) : isLocked ? (
+                      {isLocked ? (
                         <Lock className="w-4 h-4 text-zinc-500" />
-                      ) : (
+                      ) : !isCompleted ? (
                         <DoorOpen className="w-4 h-4 text-amber-400 animate-bounce" />
-                      )}
+                      ) : null}
                     </div>
                   </div>
 

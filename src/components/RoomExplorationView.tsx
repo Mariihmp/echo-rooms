@@ -20,6 +20,14 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
 }) => {
   const [hoveredObject, setHoveredObject] = useState<string | null>(null);
   const [whisperCue, setWhisperCue] = useState<string | null>(null);
+  const [showIntro, setShowIntro] = useState(true);
+
+  // The room's scene-setting message shows for 5 seconds on entry, then fades away
+  useEffect(() => {
+    setShowIntro(true);
+    const timer = setTimeout(() => setShowIntro(false), 5000);
+    return () => clearTimeout(timer);
+  }, [episode.id]);
 
   // Trigger audio and periodic haunted whispers explicitly when entering the room
   useEffect(() => {
@@ -410,26 +418,15 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
           );
         })}
 
-        {/* Bottom Action & Prompt Banner */}
-        <div className="absolute bottom-4 inset-x-4 z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-black/90 backdrop-blur-md border border-zinc-800 shadow-2xl">
-          <div className="text-xs text-zinc-300 flex items-center gap-2">
+        {/* Scene-setting message, shown briefly on entry */}
+        <div
+          className={`pointer-events-none absolute bottom-5 inset-x-4 z-30 flex justify-center transition-all duration-700 ${
+            showIntro ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+          }`}
+        >
+          <div className="flex max-w-2xl items-center gap-2.5 rounded-xl border border-white/10 bg-black/80 px-4 py-3 text-[13px] leading-relaxed text-zinc-300 shadow-2xl backdrop-blur-md">
             <Search className="w-4 h-4 text-teal-400 shrink-0" />
-            <span>
-              {theme.vibe} Examine objects to discover clues, or open the console to calibrate.
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => {
-                sound.playDoorOpen();
-                onOpenConsole();
-              }}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs font-mono transition-all shadow-lg shadow-teal-950 flex items-center justify-center gap-2 cursor-pointer hover:scale-102 active:scale-98 animate-pulse"
-            >
-              <Terminal className="w-4 h-4" />
-              <span>Examine System Console ▶</span>
-            </button>
+            <span>{theme.vibe} Examine the objects around you for clues.</span>
           </div>
         </div>
       </div>

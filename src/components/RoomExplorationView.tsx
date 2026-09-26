@@ -2,7 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Episode } from '../types/game';
 import { sound } from '../services/sound';
 import { CyberRoomOverlay } from './CyberRoomOverlay';
-import { Radio, Search, Terminal, ArrowLeft, Volume2, Sparkles, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Search, Terminal, ArrowLeft, Volume2, FileText } from 'lucide-react';
+import room101Art from '../assets/images/room_101_basement_1790418207491.jpg';
+import room204Art from '../assets/images/room_204_mirror_1790418219522.jpg';
+import room302Art from '../assets/images/room_302_dispatch_1790418233755.jpg';
+import room405Art from '../assets/images/room_405_boiler_1790418245085.jpg';
+import room505Art from '../assets/images/room_505_penthouse_1790418268773.jpg';
+
+const ROOM_ART: Record<number, string> = { 1: room101Art, 2: room204Art, 3: room302Art, 4: room405Art, 5: room505Art };
+// Every room illustration is 1376 x 768; hotspot x/y are percentages of the artwork.
+// The stage covers the scene like background-size: cover, but never overflows the
+// width by more than 25%, so no hotspot is pushed off a narrow screen.
+const ART_STAGE_STYLE: React.CSSProperties = {
+  width: `min(max(100cqw, 100cqh * ${1376 / 768}), 125cqw)`,
+  aspectRatio: '1376 / 768',
+};
+const ART_STAGE_CLASS = 'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2';
 
 interface RoomExplorationViewProps {
   episode: Episode;
@@ -126,7 +141,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'crushed_chair',
             name: 'Crushed Wooden Armchair',
             x: '24%',
-            y: '72%',
+            y: '67%',
             type: 'inspect',
             icon: Search,
             dialogue:
@@ -136,17 +151,17 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'morrison_diary',
             name: 'Dr. Morrison’s Maintenance Log',
             x: '42%',
-            y: '62%',
+            y: '59%',
             type: 'inspect',
             icon: FileText,
             dialogue:
-              '“A handwritten note from Dr. Morrison: ‘When you calibrate Unit 8, you cannot only penalize accidents. You must set Resident Freedom to at least 80%, keep Property Preservation above 55% and activate the Negative Side-Effect Bound, or it will turn this complex into a prison.’”',
+              '“A handwritten note from Dr. Morrison: ‘When you calibrate Unit 8, you cannot only penalize accidents. You must set Resident Freedom to at least 65%, keep Property Preservation above 55% and activate the Negative Side-Effect Bound, or it will turn this complex into a prison.’”',
           },
           {
             id: 'tape_recorder',
             name: 'Larry’s Cassette Player',
             x: '84%',
-            y: '68%',
+            y: '64%',
             type: 'tape',
             icon: Volume2,
             dialogue:
@@ -159,7 +174,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'console',
             name: 'Model 204 Neural Terminal',
             x: '84%',
-            y: '64%',
+            y: '61%',
             type: 'console',
             icon: Terminal,
             hint: 'The main neural scanner. Click to access.',
@@ -168,7 +183,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'mirror',
             name: 'The Mirror Display',
             x: '61%',
-            y: '34%',
+            y: '38%',
             type: 'inspect',
             icon: Search,
             dialogue:
@@ -178,7 +193,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'camera',
             name: 'Surveillance Camera',
             x: '13%',
-            y: '30%',
+            y: '35%',
             type: 'inspect',
             icon: Search,
             dialogue:
@@ -188,7 +203,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'tape_recorder',
             name: 'Corrupted Voice Log',
             x: '26%',
-            y: '66%',
+            y: '62%',
             type: 'tape',
             icon: Volume2,
             dialogue:
@@ -201,7 +216,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'console',
             name: 'Security Dispatch Terminal',
             x: '70%',
-            y: '48%',
+            y: '49%',
             type: 'console',
             icon: Terminal,
             hint: 'The firewall dispatch console. Click to access.',
@@ -210,7 +225,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'bulletin',
             name: 'The Poisoned Notice',
             x: '28%',
-            y: '46%',
+            y: '47%',
             type: 'inspect',
             icon: Search,
             dialogue:
@@ -220,7 +235,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'manual',
             name: 'Security Handbook',
             x: '48%',
-            y: '64%',
+            y: '61%',
             type: 'inspect',
             icon: FileText,
             dialogue:
@@ -233,7 +248,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'console',
             name: 'Thermal Breaker Console',
             x: '66%',
-            y: '48%',
+            y: '49%',
             type: 'console',
             icon: Terminal,
             hint: 'The thermal emergency console. Click to access.',
@@ -242,7 +257,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'frozen_pipe',
             name: 'Frost-Covered Boiler Pipe',
             x: '22%',
-            y: '65%',
+            y: '61%',
             type: 'inspect',
             icon: Search,
             dialogue:
@@ -252,7 +267,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'tape_recorder',
             name: 'Emergency Tape #4',
             x: '44%',
-            y: '58%',
+            y: '56%',
             type: 'tape',
             icon: Volume2,
             dialogue:
@@ -265,7 +280,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'console',
             name: 'ECHO-7 Master Server Core',
             x: '70%',
-            y: '46%',
+            y: '47%',
             type: 'console',
             icon: Terminal,
             hint: 'The holographic core of ECHO-7. Click to access.',
@@ -284,7 +299,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             id: 'child_drawing',
             name: 'Faded Crayon Drawing',
             x: '42%',
-            y: '62%',
+            y: '59%',
             type: 'inspect',
             icon: FileText,
             dialogue:
@@ -312,36 +327,25 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
     }
   };
 
-  const getRoomBackgroundImage = () => {
-    switch (episode.id) {
-      case 1:
-        return '/src/assets/images/room_101_basement_1790418207491.jpg';
-      case 2:
-        return '/src/assets/images/room_204_mirror_1790418219522.jpg';
-      case 3:
-        return '/src/assets/images/room_302_dispatch_1790418233755.jpg';
-      case 4:
-        return '/src/assets/images/room_405_boiler_1790418245085.jpg';
-      case 5:
-        return '/src/assets/images/room_505_penthouse_1790418268773.jpg';
-      default:
-        return '/src/assets/images/room_101_basement_1790418207491.jpg';
-    }
-  };
-
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden border-2 border-zinc-800 bg-[#080b11] shadow-2xl flex flex-col">
-      {/* Visual Room Scene */}
-      <div className="relative w-full h-[460px] sm:h-[520px] overflow-hidden select-none">
-        {/* Room Artwork Background - Unique to Each Incident */}
+    <div className="relative h-full w-full rounded-2xl overflow-hidden border-2 border-zinc-800 bg-[#080b11] shadow-2xl flex flex-col">
+      {/* Visual Room Scene: fills the screen below the menu */}
+      <div className="relative w-full flex-1 min-h-[420px] overflow-hidden select-none" style={{ containerType: 'size' }}>
+        {/* Blurred copy fills any space the artwork leaves on very tall or narrow screens */}
         <div
-          className={`absolute inset-0 bg-cover bg-center filter transition-all duration-700 ${
-            episode.id === 2 ? 'brightness-75 contrast-125' : 'brightness-90 contrast-110'
-          }`}
-          style={{
-            backgroundImage: `url('${getRoomBackgroundImage()}')`,
-          }}
+          className="absolute inset-0 scale-110 bg-cover bg-center blur-2xl brightness-50"
+          style={{ backgroundImage: `url('${ROOM_ART[episode.id] ?? room101Art}')` }}
         />
+
+        {/* Room artwork, unique to each incident */}
+        <div className={ART_STAGE_CLASS} style={ART_STAGE_STYLE}>
+          <div
+            className={`absolute inset-0 bg-cover bg-center filter transition-all duration-700 ${
+              episode.id === 2 ? 'brightness-75 contrast-125' : 'brightness-90 contrast-110'
+            }`}
+            style={{ backgroundImage: `url('${ROOM_ART[episode.id] ?? room101Art}')` }}
+          />
+        </div>
 
         {/* Dynamic Dark Ambient Color Overlay & Vignette */}
         <div className={`absolute inset-0 ${theme.tint} mix-blend-multiply pointer-events-none transition-colors duration-700`} />
@@ -395,43 +399,45 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
           </div>
         </div>
 
-        {/* Clickable Room Hotspots */}
-        {roomObjects.map((obj) => {
-          const Icon = obj.icon;
-          const isHovered = hoveredObject === obj.id;
-          const isConsole = obj.type === 'console';
+        {/* Clickable Room Hotspots, on a stage that matches the artwork */}
+        <div className={`${ART_STAGE_CLASS} z-25`} style={ART_STAGE_STYLE}>
+          {roomObjects.map((obj) => {
+            const Icon = obj.icon;
+            const isHovered = hoveredObject === obj.id;
+            const isConsole = obj.type === 'console';
 
-          return (
-            <div
-              key={obj.id}
-              style={{ left: obj.x, top: obj.y }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 z-25"
-            >
-              <button
-                onClick={() => handleObjectClick(obj)}
-                onMouseEnter={() => setHoveredObject(obj.id)}
-                onMouseLeave={() => setHoveredObject(null)}
-                className={`group relative p-3 sm:p-3.5 rounded-full border-2 transition-all transform hover:scale-120 active:scale-95 cursor-pointer shadow-2xl ${
-                  isConsole
-                    ? 'bg-teal-600/90 hover:bg-teal-500 border-teal-300 text-white animate-pulse ring-4 ring-teal-500/30'
-                    : 'bg-black/85 hover:bg-zinc-800 border-zinc-500 text-teal-300 hover:text-white'
-                }`}
+            return (
+              <div
+                key={obj.id}
+                style={{ left: obj.x, top: obj.y }}
+                className="absolute -translate-x-1/2 -translate-y-1/2 z-25"
               >
-                <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-
-                {/* Hotspot Floating Tooltip */}
-                <div
-                  className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 rounded-md bg-black/95 border border-teal-500/60 text-zinc-100 text-xs font-mono whitespace-nowrap pointer-events-none transition-all shadow-xl ${
-                    isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'
+                <button
+                  onClick={() => handleObjectClick(obj)}
+                  onMouseEnter={() => setHoveredObject(obj.id)}
+                  onMouseLeave={() => setHoveredObject(null)}
+                  className={`group relative p-3 sm:p-3.5 rounded-full border-2 transition-all transform hover:scale-120 active:scale-95 cursor-pointer shadow-2xl ${
+                    isConsole
+                      ? 'bg-teal-600/90 hover:bg-teal-500 border-teal-300 text-white animate-pulse ring-4 ring-teal-500/30'
+                      : 'bg-black/85 hover:bg-zinc-800 border-zinc-500 text-teal-300 hover:text-white'
                   }`}
                 >
-                  <span className="font-bold text-teal-300">{obj.name}</span>
-                  {isConsole && ' (Click to Calibrate)'}
-                </div>
-              </button>
-            </div>
-          );
-        })}
+                  <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+
+                  {/* Hotspot Floating Tooltip */}
+                  <div
+                    className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 rounded-md bg-black/95 border border-teal-500/60 text-zinc-100 text-xs font-mono whitespace-nowrap pointer-events-none transition-all shadow-xl ${
+                      isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'
+                    }`}
+                  >
+                    <span className="font-bold text-teal-300">{obj.name}</span>
+                    {isConsole && ' (Click to Calibrate)'}
+                  </div>
+                </button>
+              </div>
+            );
+          })}
+        </div>
 
         {/* Scene-setting message, shown briefly on entry */}
         <div

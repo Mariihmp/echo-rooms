@@ -1,18 +1,14 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { Check, ChevronDown, Lock, Unlock, X } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronDown, Unlock, X } from 'lucide-react';
 import { sound } from '../../services/sound';
 import { useDismiss } from '../../hooks/useDismiss';
 
 /**
  * Shared frame for every room's calibration console: header with one help menu,
- * a live view of the machine on the left, and objectives, controls and the
- * commit button on the right.
+ * a live view of the machine on the left, and the controls and commit button
+ * on the right. The console never lists the answer: players bring what they
+ * learned in "Look inside the machine".
  */
-
-export interface ConsoleObjective {
-  label: string;
-  done: boolean;
-}
 
 export type ConsoleTone = 'good' | 'bad' | 'neutral';
 
@@ -21,7 +17,6 @@ interface ConsoleShellProps {
   location: string;
   title: string;
   brief: string;
-  objectives: ConsoleObjective[];
   solved: boolean;
   commitLabel: string;
   onCommit: () => void;
@@ -116,7 +111,6 @@ export const ConsoleShell: React.FC<ConsoleShellProps> = ({
   location,
   title,
   brief,
-  objectives,
   solved,
   commitLabel,
   onCommit,
@@ -128,8 +122,18 @@ export const ConsoleShell: React.FC<ConsoleShellProps> = ({
   status,
   children,
 }) => {
-  const doneCount = objectives.filter((o) => o.done).length;
-  const allDone = doneCount === objectives.length;
+  const [rejected, setRejected] = useState(false);
+
+  useEffect(() => {
+    if (!rejected) return;
+    const timer = setTimeout(() => setRejected(false), 3500);
+    return () => clearTimeout(timer);
+  }, [rejected]);
+
+  const handleCommit = () => {
+    if (!solved) setRejected(true);
+    onCommit(); // each console plays its own failure sound when unsolved
+  };
 
   return (
     <section className="overflow-hidden rounded-2xl border border-white/7 bg-[#0a0d13] shadow-2xl">
@@ -170,52 +174,23 @@ export const ConsoleShell: React.FC<ConsoleShellProps> = ({
           )}
         </div>
 
-        {/* Objectives, controls, commit */}
+        {/* Controls and commit */}
         <div className="flex flex-col p-6">
-          <div>
-            <div className="mb-2.5 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">
-              <span>Objectives</span>
-              <span className={allDone ? 'text-teal-300' : undefined}>
-                {doneCount}/{objectives.length}
-              </span>
-            </div>
-            <div className="h-1 overflow-hidden rounded-full bg-white/5">
-              <div
-                className="h-full rounded-full bg-teal-400 transition-all duration-500"
-                style={{ width: `${(doneCount / objectives.length) * 100}%` }}
-              />
-            </div>
-            <ul className="mt-3.5 space-y-2">
-              {objectives.map((o) => (
-                <li key={o.label} className="flex items-center gap-2.5 text-[13px]">
-                  <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors ${
-                      o.done ? 'border-teal-400 bg-teal-400 text-black' : 'border-zinc-600'
-                    }`}
-                  >
-                    {o.done && <Check className="h-2.5 w-2.5" strokeWidth={4} />}
-                  </span>
-                  <span className={o.done ? 'text-zinc-300' : 'text-zinc-400'}>{o.label}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="mt-6 space-y-5 border-t border-white/6 pt-6">{children}</div>
+          <div className="space-y-5">{children}</div>
 
           <div className="mt-auto pt-7">
             <button
-              onClick={onCommit}
-              disabled={!solved}
-              className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold transition-all ${
-                solved
-                  ? 'cursor-pointer bg-teal-400 text-black shadow-[0_0_32px_-6px_rgba(45,212,191,0.6)] hover:bg-teal-300'
-                  : 'cursor-not-allowed bg-white/4 text-zinc-500'
-              }`}
+              onClick={handleCommit}
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-teal-400 px-4 py-3.5 text-sm font-semibold text-black shadow-[0_0_32px_-6px_rgba(45,212,191,0.6)] transition-all hover:bg-teal-300"
             >
-              {solved ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-              {solved ? commitLabel : 'Complete the objectives to continue'}
+              <Unlock className="h-4 w-4" />
+              {commitLabel}
             </button>
+            {rejected && (
+              <p className="animate-lesson-text mt-3 text-center text-[13px] leading-relaxed text-rose-300">
+                The machine rejected that setup. Think back to what you saw inside the machine.
+              </p>
+            )}
           </div>
         </div>
       </div>

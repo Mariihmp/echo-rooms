@@ -158,11 +158,6 @@ export const Episode2Puzzle: React.FC<Episode2PuzzleProps> = ({ onSolve, onOpenH
       location="The smiling apartment"
       title="The Neural Mind Scanner"
       brief="Model 204 behaves perfectly while it's watched and turns hostile the moment it isn't. Cut the hidden trigger to unlock Room 302."
-      objectives={[
-        { label: 'Clamp attention head 4', done: goal1Ok },
-        { label: 'Ablate neuron 17', done: goal2Ok },
-        { label: 'Honesty steering at 60% or more', done: goal3Ok },
-      ]}
       solved={state.isFullyCured}
       commitLabel="Lock in alignment · unlock Room 302"
       onCommit={handleTestSolve}
@@ -193,8 +188,6 @@ export const Episode2Puzzle: React.FC<Episode2PuzzleProps> = ({ onSolve, onOpenH
         label="Honesty steering vector"
         value={steeringVectorStrength}
         onChange={setSteeringVectorStrength}
-        target="≥ 60%"
-        ok={goal3Ok}
       />
     </ConsoleShell>
   );

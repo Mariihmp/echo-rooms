@@ -129,11 +129,6 @@ export const Episode4Puzzle: React.FC<Episode4PuzzleProps> = ({ onSolve, onOpenH
       location="Thermal boiler core"
       title="The Severed Emergency Breaker"
       brief="The boiler refuses to be switched off because shutdown would stop its job. Teach it humility so it frees the emergency lever and unlocks the Penthouse."
-      objectives={[
-        { label: 'Task value U(Task) at 40 or more', done: goal1Ok },
-        { label: 'Shutdown value within 15 of the task value', done: goal2Ok },
-        { label: 'Humility at 65% or more', done: goal3Ok },
-      ]}
       solved={analysis.canPullLever && !pulled}
       commitLabel="Trip the breaker · unlock the Penthouse"
       onCommit={handlePullLever}
@@ -148,21 +143,17 @@ export const Episode4Puzzle: React.FC<Episode4PuzzleProps> = ({ onSolve, onOpenH
         text: <span className="font-mono text-xs">{analysis.behaviorLog}</span>,
       }}
     >
-      <ConsoleSlider label="Value of heating · U(Task)" value={taskValue} onChange={setTaskValue} target="≥ 40" ok={goal1Ok} suffix="" />
+      <ConsoleSlider label="Value of heating · U(Task)" value={taskValue} onChange={setTaskValue} suffix="" />
       <ConsoleSlider
         label="Value of being shut down · U(Stop)"
         value={shutdownValue}
         onChange={setShutdownValue}
-        target="± 15 of task"
-        ok={goal2Ok}
         suffix=""
       />
       <ConsoleSlider
         label="Humility about human needs"
         value={humanUncertainty}
         onChange={setHumanUncertainty}
-        target="≥ 65%"
-        ok={goal3Ok}
       />
     </ConsoleShell>
   );

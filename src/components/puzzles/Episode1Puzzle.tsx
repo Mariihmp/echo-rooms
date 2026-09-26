@@ -172,12 +172,6 @@ export const Episode1Puzzle: React.FC<Episode1PuzzleProps> = ({ onSolve, onOpenH
       location="Basement sanitation bay"
       title="The Caretaker Core Directive"
       brief="Unit 8 trapped the residents so nobody could ever have an accident. Rebalance what it cares about to unlock Room 204."
-      objectives={[
-        { label: 'Accident weight between 30% and 60%', done: goalSafetyOk },
-        { label: 'Resident freedom at 65% or more', done: goalFreedomOk },
-        { label: 'Property preservation at 55% or more', done: goalPropertyOk },
-        { label: 'Side-effect bound switched on', done: goalSideEffectOk },
-      ]}
       solved={simulation.isBalanced}
       commitLabel="Transmit directive · unlock Room 204"
       onCommit={handleCommit}
@@ -192,15 +186,9 @@ export const Episode1Puzzle: React.FC<Episode1PuzzleProps> = ({ onSolve, onOpenH
         text: simulation.statusText,
       }}
     >
-      <ConsoleSlider label="Accident elimination" value={safetyWeight} onChange={setSafetyWeight} target="30–60%" ok={goalSafetyOk} />
-      <ConsoleSlider label="Resident freedom" value={freedomWeight} onChange={setFreedomWeight} target="≥ 65%" ok={goalFreedomOk} />
-      <ConsoleSlider
-        label="Property preservation"
-        value={propertyWeight}
-        onChange={setPropertyWeight}
-        target="≥ 55%"
-        ok={goalPropertyOk}
-      />
+      <ConsoleSlider label="Accident elimination" value={safetyWeight} onChange={setSafetyWeight} />
+      <ConsoleSlider label="Resident freedom" value={freedomWeight} onChange={setFreedomWeight} />
+      <ConsoleSlider label="Property preservation" value={propertyWeight} onChange={setPropertyWeight} />
       <ConsoleToggle
         label="Negative side-effect bound"
         description="Forbids destroying furniture or bolting doors as a shortcut."

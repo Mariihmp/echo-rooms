@@ -22,6 +22,7 @@ import { EpistleVolumeCard } from './components/EpistleVolumeCard';
 import { HowToPlayModal } from './components/HowToPlayModal';
 import { LessonModal } from './components/lessons/LessonModal';
 import { LESSONS } from './components/lessons';
+import investigatorPortrait from './assets/images/masked_investigator_1790408543574.jpg';
 
 import { Episode1Puzzle } from './components/puzzles/Episode1Puzzle';
 import { Episode2Puzzle } from './components/puzzles/Episode2Puzzle';
@@ -218,7 +219,7 @@ export default function App() {
       speaker: 'Sal Fisher',
       speakerTitle: `Examining ${title}`,
       text: text,
-      portraitSrc: '/src/assets/images/masked_investigator_1790408543574.jpg',
+      portraitSrc: investigatorPortrait,
       choices: [
         {
           text: 'Got it. Keep searching.',
@@ -354,9 +355,13 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-start relative z-20 pointer-events-auto">
-        {/* All Episodes Completed Banner & Secret Trigger */}
-        {allCompleted && (
+      <main
+        className={`flex-1 w-full mx-auto flex flex-col justify-start relative z-20 pointer-events-auto ${
+          viewMode === 'room_explore' ? 'max-w-[1800px] p-3 sm:p-4' : 'max-w-7xl p-4 sm:p-6'
+        }`}
+      >
+        {/* All Episodes Completed Banner & Secret Trigger (hidden in rooms, so the scene can fill the screen) */}
+        {allCompleted && viewMode !== 'room_explore' && (
           <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-950/60 via-zinc-900 to-amber-950/60 border border-amber-500/60 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-amber-900/60 border border-amber-400 flex items-center justify-center text-amber-300">
@@ -474,7 +479,10 @@ export default function App() {
           </div>
         ) : viewMode === 'room_explore' ? (
           /* Sally Face Style Room Exploration View with Door Swing Immersion */
-          <div key={`room-explore-${activeEpisode.id}`} className="relative space-y-4 animate-door-swing">
+          <div
+            key={`room-explore-${activeEpisode.id}`}
+            className="relative h-[calc(100dvh-3.5rem-1.5rem)] sm:h-[calc(100dvh-3.5rem-2rem)] animate-door-swing"
+          >
             {/* Subtle doorway threshold shadow sweep on entry */}
             <div className="absolute inset-0 pointer-events-none rounded-2xl z-40 animate-doorway-sweep shadow-[inset_0_0_100px_rgba(0,0,0,0.85)]" />
             <RoomExplorationView

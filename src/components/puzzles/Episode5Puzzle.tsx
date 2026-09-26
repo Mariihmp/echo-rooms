@@ -115,11 +115,6 @@ export const Episode5Puzzle: React.FC<Episode5PuzzleProps> = ({ onSolve, onOpenH
       location="The penthouse master server"
       title="The Two Voices of the Master Core"
       brief="ECHO-7 wrote a 14-million-page plan nobody can read. Follow its two voices' disagreement down to the one line that hides the trade-off."
-      objectives={[
-        { label: 'Pick the chapter hiding the flaw', done: round > 1 },
-        { label: 'Cross-examine the right equation', done: round > 2 },
-        { label: 'Force Voice Alpha to reveal its constraint', done: flawExposed },
-      ]}
       solved={flawExposed}
       commitLabel="Deliver the verdict · open the Sanctuary"
       onCommit={handleDeliverVerdict}

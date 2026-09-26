@@ -136,11 +136,6 @@ export const Episode3Puzzle: React.FC<Episode3PuzzleProps> = ({ onSolve, onOpenH
       location="Security dispatch office"
       title="The Scanner & the Trojan Words"
       brief="A flyer with hidden text talked the scanner into opening the vaults. Wall off untrusted text from real commands to unlock Room 405."
-      objectives={[
-        { label: 'Structural boundary tags on', done: xmlFraming },
-        { label: 'Token & delimiter sanitizer on', done: delimiterSanitizer },
-        { label: 'Privilege separation firewall on', done: dualModelPrivilege },
-      ]}
       solved={securityState.isProtected}
       commitLabel="Deploy filters · unlock Room 405"
       onCommit={handleTestSolve}

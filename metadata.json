@@ -1,0 +1,6 @@
+{
+  "name": "Echo Rooms: The Whispering Weights",
+  "description": "A dark narrative episodic puzzle adventure inspired by Sally Face. Explore eerie corridors, use your retro Align-Boy device, and solve visual puzzles teaching core AI safety principles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

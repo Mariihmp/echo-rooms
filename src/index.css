@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+  
+  h1, h2, h3, .font-title {
+    font-family: 'Cinzel', serif;
+  }
+  
+  .font-mono-retro {
+    font-family: 'VT323', monospace;
+  }
+  
+  .font-code {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Atmospheric CRT scanline overlay - applied only to dedicated overlay div */
+.crt-scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.22) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.02),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.02)
+  );
+  background-size: 100% 4px, 6px 100%;
+}
+
+.crt-vignette {
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8), inset 0 0 200px rgba(0, 0, 0, 0.6);
+}
+
+/* Custom scrollbars for atmospheric tech look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a3441;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
+}
+
+@keyframes subtleFlicker {
+  0%, 100% { opacity: 0.98; }
+  45% { opacity: 1; }
+  50% { opacity: 0.94; }
+  55% { opacity: 0.99; }
+  80% { opacity: 0.93; }
+  85% { opacity: 1; }
+}
+
+.animate-flicker {
+  animation: subtleFlicker 6s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(20, 184, 166, 0.4)); }
+  50% { filter: drop-shadow(0 0 14px rgba(20, 184, 166, 0.7)); }
+}
+
+.glow-teal {
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+/* Door Swing & Atmospheric Entry Animations for Room Exploration */
+@keyframes doorSwingFadeIn {
+  0% {
+    opacity: 0;
+    transform: perspective(1200px) rotateY(-7deg) scale(0.96) translateY(6px);
+    filter: brightness(0.35) contrast(1.25) blur(4px);
+  }
+  40% {
+    opacity: 0.8;
+    filter: brightness(0.85) contrast(1.1) blur(1px);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1200px) rotateY(0deg) scale(1) translateY(0);
+    filter: brightness(1) contrast(1) blur(0px);
+  }
+}
+
+@keyframes doorwayVignetteSweep {
+  0% {
+    opacity: 0.85;
+    background: radial-gradient(circle at 20% 50%, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.95) 100%);
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-door-swing {
+  animation: doorSwingFadeIn 750ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: left center;
+  will-change: transform, opacity, filter;
+}
+
+.animate-doorway-sweep {
+  animation: doorwayVignetteSweep 800ms ease-out forwards;
+}
+

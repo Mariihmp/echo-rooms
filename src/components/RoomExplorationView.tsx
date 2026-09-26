@@ -296,17 +296,17 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
   const getRoomBackgroundImage = () => {
     switch (episode.id) {
       case 1:
-        return '/src/assets/images/room_101_basement_1790418207491.jpg';
+        return '/images/room_101_basement_1790418207491.jpg';
       case 2:
-        return '/src/assets/images/room_204_mirror_1790418219522.jpg';
+        return '/images/room_204_mirror_1790418219522.jpg';
       case 3:
-        return '/src/assets/images/room_302_dispatch_1790418233755.jpg';
+        return '/images/room_302_dispatch_1790418233755.jpg';
       case 4:
-        return '/src/assets/images/room_405_boiler_1790418245085.jpg';
+        return '/images/room_405_boiler_1790418245085.jpg';
       case 5:
-        return '/src/assets/images/room_505_penthouse_1790418268773.jpg';
+        return '/images/room_505_penthouse_1790418268773.jpg';
       default:
-        return '/src/assets/images/room_101_basement_1790418207491.jpg';
+        return '/images/room_101_basement_1790418207491.jpg';
     }
   };
 

@@ -61,7 +61,7 @@ export const HallwayView: React.FC<HallwayViewProps> = ({
         <div 
           className="absolute inset-0 bg-cover bg-center transition-all duration-700 filter brightness-75 contrast-125"
           style={{
-            backgroundImage: `url('/src/assets/images/sally_face_hallway_1790408526709.jpg')`,
+            backgroundImage: `url('/images/sally_face_hallway_1790408526709.jpg')`,
             backgroundPosition: `${50 + (salPosition - 2) * 14}% center`,
           }}
         />
@@ -154,7 +154,7 @@ export const HallwayView: React.FC<HallwayViewProps> = ({
                       {/* Clean Circular Mask Portrait Token */}
                       <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-teal-400 overflow-hidden shadow-2xl bg-black relative ring-2 ring-black/90 transition-transform">
                         <img 
-                          src="/src/assets/images/masked_investigator_1790408543574.jpg" 
+                          src="/images/masked_investigator_1790408543574.jpg" 
                           alt="Sal Fisher" 
                           className="w-full h-full object-cover" 
                         />

@@ -189,7 +189,7 @@ export default function App() {
       speaker: 'Sal Fisher',
       speakerTitle: `Examining ${title}`,
       text: text,
-      portraitSrc: '/src/assets/images/masked_investigator_1790408543574.jpg',
+      portraitSrc: '/images/masked_investigator_1790408543574.jpg',
       choices: [
         {
           text: 'Got it. Keep searching.',

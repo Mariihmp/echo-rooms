@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { sound } from '../services/sound';
+import { useDismiss } from '../hooks/useDismiss';
 import { MoreHorizontal, Volume2, VolumeX } from 'lucide-react';
 
 interface HeaderNavProps {
@@ -53,22 +54,8 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onPointerDown = (e: MouseEvent) => {
-      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMenuOpen(false);
-    };
-    document.addEventListener('mousedown', onPointerDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onPointerDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [menuOpen]);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  useDismiss(menuRef, menuOpen, closeMenu);
 
   const links = [
     { label: 'Guide', onClick: onOpenHowToPlay, sfx: () => sound.playClick() },

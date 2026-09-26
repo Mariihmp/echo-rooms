@@ -40,6 +40,15 @@ function readDevLink() {
 }
 const devLink = readDevLink();
 
+// Calibration console for each episode
+const PUZZLES: Record<number, typeof Episode1Puzzle> = {
+  1: Episode1Puzzle,
+  2: Episode2Puzzle,
+  3: Episode3Puzzle,
+  4: Episode4Puzzle,
+  5: Episode5Puzzle,
+};
+
 export default function App() {
   // Persistence state
   const [episodes, setEpisodes] = useState<Episode[]>(() => {
@@ -171,6 +180,7 @@ export default function App() {
   }, []);
 
   const activeEpisode = episodes.find((e) => e.id === activeEpisodeId) || episodes[0];
+  const ActivePuzzle = PUZZLES[activeEpisodeId];
   const allCompleted = episodes.every((e) => e.status === 'completed');
 
   // Step into an apartment room for atmospheric exploration
@@ -482,61 +492,16 @@ export default function App() {
             />
           </div>
         ) : (
-          /* Machine Calibration Puzzle Terminal */
-          <div className="space-y-4">
-            <div className="flex items-center justify-between pb-2">
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  setViewMode('room_explore');
-                }}
-                className="px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-mono text-zinc-300 flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
-              >
-                ◀ Step Away from Console
-              </button>
-              <div className="text-xs font-mono text-zinc-400 flex items-center gap-2">
-                <span>Stuck? Click "Apply Hint" or open Larry's Walkie</span>
-              </div>
-            </div>
-
-            <div className="bg-[#0b0e14] border border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-2xl relative">
-              {activeEpisodeId === 1 && (
-                <Episode1Puzzle
-                  onSolve={() => handleSolveEpisode(1)}
-                  onOpenHints={() => setShowHints(true)}
-                  onOpenWalkie={() => setShowLarryWalkie(true)}
-                />
-              )}
-              {activeEpisodeId === 2 && (
-                <Episode2Puzzle
-                  onSolve={() => handleSolveEpisode(2)}
-                  onOpenHints={() => setShowHints(true)}
-                  onOpenWalkie={() => setShowLarryWalkie(true)}
-                />
-              )}
-              {activeEpisodeId === 3 && (
-                <Episode3Puzzle
-                  onSolve={() => handleSolveEpisode(3)}
-                  onOpenHints={() => setShowHints(true)}
-                  onOpenWalkie={() => setShowLarryWalkie(true)}
-                />
-              )}
-              {activeEpisodeId === 4 && (
-                <Episode4Puzzle
-                  onSolve={() => handleSolveEpisode(4)}
-                  onOpenHints={() => setShowHints(true)}
-                  onOpenWalkie={() => setShowLarryWalkie(true)}
-                />
-              )}
-              {activeEpisodeId === 5 && (
-                <Episode5Puzzle
-                  onSolve={() => handleSolveEpisode(5)}
-                  onOpenHints={() => setShowHints(true)}
-                  onOpenWalkie={() => setShowLarryWalkie(true)}
-                />
-              )}
-            </div>
-          </div>
+          /* Machine calibration console */
+          ActivePuzzle && (
+            <ActivePuzzle
+              key={activeEpisodeId}
+              onSolve={() => handleSolveEpisode(activeEpisodeId)}
+              onOpenHints={() => setShowHints(true)}
+              onOpenWalkie={() => setShowLarryWalkie(true)}
+              onExit={() => setViewMode('room_explore')}
+            />
+          )
         )}
       </main>
 
@@ -579,6 +544,7 @@ export default function App() {
 
       {/* Larry's Walkie-Talkie Transceiver */}
       <LarryWalkieModal
+        key={`walkie-${activeEpisodeId}`}
         isOpen={showLarryWalkie}
         onClose={() => setShowLarryWalkie(false)}
         activeEpisodeId={activeEpisodeId}
@@ -616,6 +582,7 @@ export default function App() {
 
       {/* Whisper Hint System */}
       <HintModal
+        key={`hints-${activeEpisodeId}`}
         isOpen={showHints}
         onClose={() => setShowHints(false)}
         episodeTitle={`${activeEpisode.roomNumber}: ${activeEpisode.title}`}

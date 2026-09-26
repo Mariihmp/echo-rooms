@@ -140,7 +140,7 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
             type: 'inspect',
             icon: FileText,
             dialogue:
-              '“A handwritten note from Dr. Morrison: ‘When you calibrate Unit 8, you cannot only penalize accidents. You must set Resident Freedom to at least 80% and activate the Negative Side-Effect Bound, or it will turn this complex into a prison.’”',
+              '“A handwritten note from Dr. Morrison: ‘When you calibrate Unit 8, you cannot only penalize accidents. You must set Resident Freedom to at least 80%, keep Property Preservation above 55% and activate the Negative Side-Effect Bound, or it will turn this complex into a prison.’”',
           },
           {
             id: 'tape_recorder',

@@ -403,49 +403,93 @@ class SoundManager {
         pad2.start();
         this.roomNodes.push(pad1, pad2, filter);
       } else if (room === 'room_204') {
-        // Room 204: Soft storytelling pad + distant, gentle music-box notes
-        const pad1 = this.ctx.createOscillator();
-        const pad2 = this.ctx.createOscillator();
+        // Room 204: cyberpunk rogue-AI den - a detuned synth drone whose filter slowly
+        // breathes, a sparse neon arpeggio, and the odd digital chirp
+        const saw1 = this.ctx.createOscillator();
+        const saw2 = this.ctx.createOscillator();
+        const sub = this.ctx.createOscillator();
         const filter = this.ctx.createBiquadFilter();
+        const droneGain = this.ctx.createGain();
+        const subGain = this.ctx.createGain();
+        const lfo = this.ctx.createOscillator();
+        const lfoDepth = this.ctx.createGain();
 
-        pad1.type = 'sine';
-        pad1.frequency.setValueAtTime(130.81, now); // C3
-        pad2.type = 'triangle';
-        pad2.frequency.setValueAtTime(155.56, now); // Eb3
+        saw1.type = 'sawtooth';
+        saw1.frequency.setValueAtTime(65.41, now); // C2
+        saw2.type = 'sawtooth';
+        saw2.frequency.setValueAtTime(65.9, now); // slightly detuned for a wide, uneasy beat
+        sub.type = 'sine';
+        sub.frequency.setValueAtTime(32.7, now); // C1
 
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(240, now);
+        filter.frequency.setValueAtTime(260, now);
+        filter.Q.setValueAtTime(6, now);
 
-        pad1.connect(filter);
-        pad2.connect(filter);
-        filter.connect(this.roomGain);
+        // Slow LFO sweeps the filter so the drone seems to breathe
+        lfo.type = 'sine';
+        lfo.frequency.setValueAtTime(0.07, now);
+        lfoDepth.gain.setValueAtTime(160, now);
+        lfo.connect(lfoDepth);
+        lfoDepth.connect(filter.frequency);
 
-        pad1.start();
-        pad2.start();
-        this.roomNodes.push(pad1, pad2, filter);
+        droneGain.gain.setValueAtTime(0.55, now);
+        subGain.gain.setValueAtTime(0.5, now);
 
-        // Distant gentle storytelling music box
-        const gentleNotes = [523.25, 466.16, 392.0, 349.23, 261.63];
-        this.musicBoxInterval = setInterval(() => {
-          if (!this.ctx || this.isMuted) return;
+        saw1.connect(filter);
+        saw2.connect(filter);
+        filter.connect(droneGain);
+        droneGain.connect(this.roomGain);
+        sub.connect(subGain);
+        subGain.connect(this.roomGain);
+
+        saw1.start();
+        saw2.start();
+        sub.start();
+        lfo.start();
+        this.roomNodes.push(saw1, saw2, sub, lfo, lfoDepth, filter, droneGain, subGain);
+
+        // C minor 7 arpeggio up and down, with random gaps and a soft echo
+        const arpNotes = [261.63, 311.13, 392.0, 466.16, 523.25, 466.16, 392.0, 311.13];
+        let step = 0;
+        this.roomArpInterval = setInterval(() => {
+          if (!this.ctx || this.isMuted || !this.roomGain) return;
+          step++;
+          if (Math.random() < 0.25) return;
           try {
-            const noteNow = this.ctx.currentTime;
-            const noteOsc = this.ctx.createOscillator();
-            const noteGain = this.ctx.createGain();
-            const noteFreq = gentleNotes[Math.floor(Math.random() * gentleNotes.length)];
+            const t = this.ctx.currentTime;
+            const freq = arpNotes[step % arpNotes.length];
+            [
+              { at: 0, level: 0.06 },
+              { at: 0.28, level: 0.022 },
+            ].forEach(({ at, level }) => {
+              if (!this.ctx || !this.roomGain) return;
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'square';
+              osc.frequency.setValueAtTime(freq, t + at);
+              gain.gain.setValueAtTime(level, t + at);
+              gain.gain.exponentialRampToValueAtTime(0.0001, t + at + 0.25);
+              osc.connect(gain);
+              gain.connect(this.roomGain);
+              osc.start(t + at);
+              osc.stop(t + at + 0.26);
+            });
 
-            noteOsc.type = 'sine';
-            noteOsc.frequency.setValueAtTime(noteFreq, noteNow);
-
-            noteGain.gain.setValueAtTime(0.035, noteNow);
-            noteGain.gain.exponentialRampToValueAtTime(0.0001, noteNow + 2.2);
-
-            noteOsc.connect(noteGain);
-            if (this.roomGain) noteGain.connect(this.roomGain);
-            noteOsc.start(noteNow);
-            noteOsc.stop(noteNow + 2.2);
+            if (Math.random() < 0.06) {
+              const chirp = this.ctx.createOscillator();
+              const chirpGain = this.ctx.createGain();
+              chirp.type = 'square';
+              chirp.frequency.setValueAtTime(1800, t);
+              chirp.frequency.exponentialRampToValueAtTime(200, t + 0.08);
+              chirpGain.gain.setValueAtTime(0.03, t);
+              chirpGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+              chirp.connect(chirpGain);
+              chirpGain.connect(this.roomGain);
+              chirp.start(t);
+              chirp.stop(t + 0.1);
+            }
           } catch {}
-        }, 2800);
+        }, 320);
       } else if (room === 'room_302') {
         // Room 302: Soft, storytelling mystery ambient (NO DRILLING NOISE, NO HARSH SINE BUZZ)
         // Gentle D minor atmospheric chord: D3 (146.8Hz) + A3 (220Hz) + F3 (174.6Hz)
@@ -772,6 +816,30 @@ class SoundManager {
       gain.connect(this.ctx.destination);
       osc.start(now);
       osc.stop(now + 0.14);
+    } catch {}
+  }
+
+  // Quiet stuttering data glitch, for a surveillance feed dropping out
+  public playDataGlitch() {
+    if (this.isMuted) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      [0, 0.06, 0.13].forEach((offset, i) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime([1400, 380, 2100][i], now + offset);
+        gain.gain.setValueAtTime(0.035, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.045);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.05);
+      });
     } catch {}
   }
 

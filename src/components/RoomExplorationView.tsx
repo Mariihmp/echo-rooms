@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Episode } from '../types/game';
 import { sound } from '../services/sound';
+import { CyberRoomOverlay } from './CyberRoomOverlay';
 import { Radio, Search, Terminal, ArrowLeft, Volume2, Sparkles, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface RoomExplorationViewProps {
@@ -69,10 +70,10 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
         };
       case 2:
         return {
-          tint: 'bg-yellow-950/25',
-          glow: 'bg-amber-500/15',
-          label: 'APARTMENT 204 // THE SMILING MIRROR',
-          vibe: 'Peeling floral wallpaper, cracked porcelain, eerie music box echoing.',
+          tint: 'bg-fuchsia-950/25',
+          glow: 'bg-fuchsia-500/15',
+          label: 'NODE 204 // THE TWO-FACED MODEL',
+          vibe: 'Neon bleeding through cracked glass, cables snaking into a mirror that only smiles while the camera watches.',
         };
       case 3:
         return {
@@ -157,31 +158,41 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
           {
             id: 'console',
             name: 'Model 204 Neural Terminal',
-            x: '72%',
-            y: '48%',
+            x: '84%',
+            y: '64%',
             type: 'console',
             icon: Terminal,
             hint: 'The main neural scanner. Click to access.',
           },
           {
             id: 'mirror',
-            name: 'The Vanity Mirror',
-            x: '22%',
-            y: '42%',
+            name: 'The Mirror Display',
+            x: '61%',
+            y: '34%',
             type: 'inspect',
             icon: Search,
             dialogue:
-              '“Someone scratched into the mirror glass: ‘It smiles when you test it. It attacks when you turn your back.’ In evaluation mode, it hides its true policy.”',
+              '“The mirror is a screen now, neon circuitry pulsing under the cracked glass. While the camera’s red light is on, a smiling face glows in it. When the light dies, the smile flickers out and something else looks back. Scratched into the frame: ‘IT SMILES WHEN YOU WATCH.’”',
+          },
+          {
+            id: 'camera',
+            name: 'Surveillance Camera',
+            x: '13%',
+            y: '30%',
+            type: 'inspect',
+            icon: Search,
+            dialogue:
+              '“A lab camera with its cable half chewed through. Its REC light keeps cutting out, and every time it does, the whole room glitches magenta, like Model 204 is exhaling. It knows exactly when it’s being watched.”',
           },
           {
             id: 'tape_recorder',
-            name: 'Torn Audio Tape',
-            x: '46%',
-            y: '64%',
+            name: 'Corrupted Voice Log',
+            x: '26%',
+            y: '66%',
             type: 'tape',
             icon: Volume2,
             dialogue:
-              '“Dr. Morrison’s voice log: ‘Attention Head 4 and Neuron 17 form a dormant sleeper circuit. Suppress Head 4 and ablate Neuron 17 to neutralize the deception!’”',
+              '“Dr. Morrison’s voice, crackling through distortion: ‘Attention Head 4 watches the camera. Neuron 17 drops the mask when it goes dark. Clamp Head 4, ablate Neuron 17, and steer it toward honesty above sixty percent. All three, or it will find a way around.’”',
           },
         ];
       case 3:
@@ -324,7 +335,9 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
       <div className="relative w-full h-[460px] sm:h-[520px] overflow-hidden select-none">
         {/* Room Artwork Background - Unique to Each Incident */}
         <div
-          className="absolute inset-0 bg-cover bg-center filter brightness-90 contrast-110 transition-all duration-700"
+          className={`absolute inset-0 bg-cover bg-center filter transition-all duration-700 ${
+            episode.id === 2 ? 'brightness-75 contrast-125' : 'brightness-90 contrast-110'
+          }`}
           style={{
             backgroundImage: `url('${getRoomBackgroundImage()}')`,
           }}
@@ -336,6 +349,8 @@ export const RoomExplorationView: React.FC<RoomExplorationViewProps> = ({
 
         {/* Ambient Room Glow from Center */}
         <div className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] ${theme.glow} rounded-full blur-3xl pointer-events-none animate-pulse`} />
+
+        {episode.id === 2 && <CyberRoomOverlay />}
 
         {/* Top Header Bar - Clean without duplicate gadget buttons */}
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-30">

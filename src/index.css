@@ -178,3 +178,45 @@
 .lesson-blink {
   animation: lessonBlink 1.2s linear infinite;
 }
+
+/* ---- Room 204 cyberpunk layer ---- */
+.cyber-grid {
+  background-image:
+    linear-gradient(rgba(255, 43, 214, 0.55) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.45) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to top, black 10%, transparent 75%);
+  opacity: 0.28;
+  mix-blend-mode: screen;
+  animation: cyberGrid 3.5s linear infinite;
+}
+@keyframes cyberGrid {
+  from { background-position: 0 0; }
+  to { background-position: 0 56px; }
+}
+
+.cyber-scan {
+  background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.07) 45%, rgba(34, 211, 238, 0.16) 50%, transparent);
+  animation: cyberScan 7s linear infinite;
+}
+@keyframes cyberScan {
+  from { top: -15%; }
+  to { top: 110%; }
+}
+
+.cyber-flicker {
+  animation: cyberFlicker 0.18s steps(2) infinite;
+}
+@keyframes cyberFlicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.cyber-slice {
+  animation: cyberSlice 0.3s steps(3) infinite;
+}
+@keyframes cyberSlice {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(-18px); }
+  66% { transform: translateX(12px); }
+}
